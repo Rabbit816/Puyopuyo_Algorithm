@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
-using Block;
+using Data;
 
 namespace Algorithm
 {
@@ -13,24 +13,17 @@ namespace Algorithm
         /// <summary>
         /// 4つ以上同じ色のブロックが繋がっているかを探索し該当ブロックを削除する
         /// </summary>
-        /// <param name="colorData">盤面のカラー情報</param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        public static BLOCK_COLOR[,] DeleteBlock(BLOCK_COLOR[,] colorData)
+        public static BLOCK_COLOR[,] DeleteBlock(BLOCK_COLOR[,] data)
         {
             deleteBlockList.Clear();
-            BLOCK_COLOR[,] check = new BLOCK_COLOR[Field.FIELD_SIZE_X, Field.FIELD_SIZE_Y];
-            for(int i = 0; i < Field.FIELD_SIZE_X; i++)
-            {
-                for (int j = 0; j < Field.FIELD_SIZE_Y; j++)
-                {
-                    check[i, j] = colorData[i, j];
-                }
-            }
+            BLOCK_COLOR[,] check = new BLOCK_COLOR[DataManager.FIELD_SIZE_X, DataManager.FIELD_SIZE_Y];
+            System.Array.Copy(data, 0, check, 0, check.Length);
 
-
-            for(int i = 0; i < Field.FIELD_SIZE_X; i++)
+            for(int i = 0; i < DataManager.FIELD_SIZE_X; i++)
             {
-                for(int j = 0; j < Field.FIELD_SIZE_Y; j++)
+                for(int j = 0; j < DataManager.FIELD_SIZE_Y; j++)
                 {
                     if(check[i, j] != BLOCK_COLOR.NONE)
                     {
@@ -49,10 +42,10 @@ namespace Algorithm
 
             if(deleteBlockList.Count > 0)
             {
-                return Vanish(colorData);
+                return Vanish(data);
             }
 
-            return colorData;
+            return data;
         }
 
         /// <summary>
@@ -69,11 +62,11 @@ namespace Algorithm
             string str = x.ToString() + "," + y.ToString();
             data.Add(str);
 
-            if (x + 1 < Field.FIELD_SIZE_X && color == checkList[x + 1, y])
+            if (x + 1 < DataManager.FIELD_SIZE_X && color == checkList[x + 1, y])
             {
                 Count(x + 1, y, checkList, data);
             }
-            if (y + 1 < Field.FIELD_SIZE_Y && color == checkList[x, y + 1])
+            if (y + 1 < DataManager.FIELD_SIZE_Y && color == checkList[x, y + 1])
             {
                 Count(x, y + 1, checkList, data);
             }
@@ -94,11 +87,11 @@ namespace Algorithm
         /// <returns></returns>
         private static BLOCK_COLOR[,] Vanish(BLOCK_COLOR[,] data)
         {
-            BLOCK_COLOR[,] temp = new BLOCK_COLOR[Field.FIELD_SIZE_X, Field.FIELD_SIZE_Y];
+            BLOCK_COLOR[,] temp = new BLOCK_COLOR[DataManager.FIELD_SIZE_X, DataManager.FIELD_SIZE_Y];
 
-            for(int i = 0; i < Field.FIELD_SIZE_X; i++)
+            for(int i = 0; i < DataManager.FIELD_SIZE_X; i++)
             {
-                for(int j = 0; j < Field.FIELD_SIZE_Y; j++)
+                for(int j = 0; j < DataManager.FIELD_SIZE_Y; j++)
                 {
                     bool flag = false;
                     foreach(var item in deleteBlockList)
@@ -131,24 +124,50 @@ namespace Algorithm
         /// <returns></returns>
         public static BLOCK_COLOR[,] SortBlock(BLOCK_COLOR[,] data)
         {
-            for(int i = 0; i < Field.FIELD_SIZE_X; i++)
+            for(int i = 0; i < DataManager.FIELD_SIZE_X; i++)
             {
-                BLOCK_COLOR[] vertical = new BLOCK_COLOR[Field.FIELD_SIZE_Y];
+                BLOCK_COLOR[] vertical = new BLOCK_COLOR[DataManager.FIELD_SIZE_Y];
 
-                for (int j = 0; j < Field.FIELD_SIZE_Y; j++)
+                for (int j = 0; j < DataManager.FIELD_SIZE_Y; j++)
                 {
                     vertical[j] = data[i, j];
                 }
 
                 BLOCK_COLOR[] temp = vertical.Where(color => color != BLOCK_COLOR.NONE).ToArray();
 
-                for(int j = 0; j < Field.FIELD_SIZE_Y; j++)
+                for(int j = 0; j < DataManager.FIELD_SIZE_Y; j++)
                 {
                     data[i, j] = j < temp.Length ? temp[j] : BLOCK_COLOR.NONE;
                 }
             }
             
             return data;
+        }
+
+        /// <summary>
+        /// ブロックが消えたかをチェックする
+        /// </summary>
+        /// <param name="before">更新前のデータ</param>
+        /// <param name="after">更新後のデータ</param>
+        /// <returns></returns>
+        public static bool CheckDelete(BLOCK_COLOR[,] before, BLOCK_COLOR[,] after)
+        {
+            bool temp = false;
+            for(int i = 0; i < DataManager.FIELD_SIZE_X; i++)
+            {
+                for(int j = 0; j < DataManager.FIELD_SIZE_Y; j++)
+                {
+                    if(before[i, j] != after[i, j])
+                    {
+                        temp = true;
+                        break;
+                    }
+                }
+
+                if (temp) { break; }
+            }
+
+            return temp;
         }
     }
 }
