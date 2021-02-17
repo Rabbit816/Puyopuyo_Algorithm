@@ -13,10 +13,13 @@ public class GameManager : MonoBehaviour
     private bool coroutineFlag = false;
     private bool isGameOver = false;
 
+    [SerializeField] private GameObject gameOverObject = null;
+
     // Start is called before the first frame update
     void Start()
     {
         GameInitialize();
+        gameOverObject.SetActive(false);
         fall.StartFall();
     }
 
@@ -30,14 +33,16 @@ public class GameManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space) && isGameOver)
         {
             isGameOver = false;
+            gameOverObject.SetActive(false);
             field.ClearField();
         }
     }
 
     private void GameInitialize()
     {
-        field = FindObjectOfType<Field>();
-        fall = FindObjectOfType<Fall>();
+        GameObject obj = GameObject.Find("Field");
+        field = obj.GetComponent<Field>();
+        fall = obj.GetComponent<Fall>();
     }
 
     /// <summary>
@@ -131,7 +136,7 @@ public class GameManager : MonoBehaviour
                 if (DataManager.GameOverCheck())
                 {
                     // ゲームオーバー処理
-                    Debug.LogError("ゲームオーバー");
+                    gameOverObject.SetActive(true);
                     isGameOver = true;
                 }
                 else
